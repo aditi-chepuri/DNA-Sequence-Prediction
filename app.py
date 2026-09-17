@@ -51,75 +51,53 @@ def extract_kmers(sequence, k=5):
         kmers = [sequence[i:i+k] for i in range(len(sequence) - k + 1)]
         return ' '.join(kmers)
 
+
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     prediction = None
+
     if request.method == 'POST':
-        # Function to extract k-mers from DNA sequence
-    
-
-        # Load the dataset
-        df = pd.read_csv("DNA.csv")
-
-        # Step 1: Preprocess the data (Convert DNA sequences into k-mer frequencies)
-        k = 5  # You can experiment with different k values (e.g., 3, 4, 5, 6)
-        df['kmers'] = df['sequence'].apply(lambda seq: extract_kmers(seq, k))
-
-        # Step 2: TF-IDF Vectorization
-        vectorizer = TfidfVectorizer(analyzer='word')
-        X = vectorizer.fit_transform(df['kmers'])
-
-        # Step 3: Train the first classifier to predict the species
-        X_train, X_test, y_train, y_test = train_test_split(X, df['species'], test_size=0.3, random_state=42)
-
-        # Trying RandomForestClassifier instead of Naive Bayes for species classification
-        species_classifier = RandomForestClassifier(random_state=42)
-        species_classifier.fit(X_train, y_train)
-
-        # Make predictions and evaluate the species classifier
-        species_predictions = species_classifier.predict(X_test)
-        species_accuracy = accuracy_score(y_test, species_predictions)
-        #print(f"Species Classifier Accuracy: {species_accuracy}")
-
-        # Step 4: Train a separate classifier for each species to predict the class
-        # Create dictionaries to store classifiers for each species
-        classifiers = {}
-
-        for species in df['species'].unique():
-            # Filter the data for the current species
-            species_data = df[df['species'] == species]
-            X_species = vectorizer.transform(species_data['kmers'])
-            y_species = species_data['class']
-            
-            # Split the data into train and test sets
-            X_train_species, X_test_species, y_train_species, y_test_species = train_test_split(X_species, y_species, test_size=0.3, random_state=42)
-            
-            # Try Random Forest for class classification as well
-            class_classifier = RandomForestClassifier(random_state=42)
-            class_classifier.fit(X_train_species, y_train_species)
-            
-            # Store the classifier in the dictionary
-            classifiers[species] = class_classifier
         # Get the DNA sequence from the form
-        sequence = request.form['sequence']
-        
+        sequence = request.form['sequence'].strip().upper()
+
+        # Convert DNA sequence into k-mers
+        k = 5
         sequence_kmers = extract_kmers(sequence, k)
+
+        # Use the already-trained TF-IDF vectorizer
         sequence_vector = vectorizer.transform([sequence_kmers])
-    
-    # Predict the species first
+
+        # Predict the species using the already-trained species classifier
         predicted_species = species_classifier.predict(sequence_vector)[0]
-    
-    # Predict the class within the predicted species
-        class_classifier = classifiers[predicted_species]
+
+        # Convert species name to lowercase because our dictionary
+        # uses lowercase keys: human, dog, chimp
+        predicted_species_key = str(predicted_species).lower()
+
+        # Check that the corresponding classifier exists
+        if predicted_species_key not in classifiers:
+            return render_template(
+                'predict.html',
+                prediction='Species prediction error'
+            )
+
+        # Get the classifier for the predicted species
+        class_classifier = classifiers[predicted_species_key]
+
+        # Predict the class
         predicted_class = class_classifier.predict(sequence_vector)[0]
-        if predicted_species:
-            # Redirect to the result page with species and class prediction
-            return redirect(url_for('result', species_prediction=predicted_species, class_prediction=predicted_class))
-        else:
-            # If the species is not recognized, show an error or default behavior
-            return render_template('predict.html', prediction='Species prediction error')
+
+        # Redirect to result page
+        return redirect(
+            url_for(
+                'result',
+                species_prediction=predicted_species,
+                class_prediction=str(predicted_class)
+            )
+        )
 
     return render_template('predict.html', prediction=prediction)
+
 
 @app.route('/result')
 def result():
