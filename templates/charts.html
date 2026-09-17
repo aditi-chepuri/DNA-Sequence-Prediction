@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Sequence Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('../static/img/p4.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .navbar {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        /* Slide In Animation for Navbar */
+        @keyframes slideIn {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            padding: 0;
+            margin: 0;
+        }
+
+        .navbar ul li {
+            margin: 0 15px;
+        }
+
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .navbar ul li a:hover {
+            color: #2ebe11;
+            transform: scale(1.1);
+        }
+
+        .container {
+            margin-top: 100px;
+            text-align: center;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+            animation: bounceIn 1s ease-out;
+            width: 60%; /* Make the container responsive */
+            max-width: 800px;
+        }
+
+        /* Bounce In Animation */
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .animated-heading {
+            font-size: 28px;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        /* Fade In Up for Heading */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #chartImage {
+            width: 100%;
+            max-width: 500px; /* Adjust the size */
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            transition: transform 1s ease-in-out;
+        }
+
+        /* Add animation effect to the chart image */
+        @keyframes fadeInChart {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #chartImage {
+            animation: fadeInChart 1.5s ease-in-out;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 14px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="title">DNA Sequence Prediction</div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/predict">Prediction</a></li>
+            <li><a href="/charts">Charts</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container animated-container">
+        <!-- Chart Image will be dynamically updated here -->
+        <img id="chartImage" src="../static/img/c1.jpg" alt="Chart">
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 DNA Sequence Prediction. All rights reserved.</p>
+    </div>
+
+    <script>
+        // Array of chart image paths
+        const chartImages = [
+            "../static/img/c1.png",
+            "../static/img/c2.png",
+            "../static/img/c3.png",
+            "../static/img/c4.png"
+        ];
+
+        let currentIndex = 0; // Track current image index
+        const chartElement = document.getElementById("chartImage");
+
+        // Function to change chart image
+        function changeChart() {
+            currentIndex = (currentIndex + 1) % chartImages.length; // Loop through images
+            chartElement.src = chartImages[currentIndex];
+            chartElement.style.animation = 'none'; // Reset animation
+            chartElement.offsetHeight; // Trigger reflow to reset animation
+            chartElement.style.animation = 'fadeInChart 2.5s ease-in-out'; // Reapply animation
+        }
+
+        // Change image every 3 seconds
+        setInterval(changeChart, 3000);
+    </script>
+</body>
+</html>
